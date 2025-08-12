@@ -143,12 +143,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header  />
 
       {/* Main Layout */}
       <div className="flex max-w-7xl mx-auto pt-16">
         {/* Left Sidebar - Hidden on mobile */}
-        <div className="hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+  <div className="hidden lg:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto z-auto">
           <LeftSidebar currentUser={currentUser} />
         </div>
 
@@ -176,9 +176,11 @@ export default function Dashboard() {
         </main>
 
         {/* Right Sidebar - Hidden on tablet and mobile */}
-        <div className="hidden xl:block sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+  <div  className="hidden xl:block  sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto z-auto ">
           <RightSidebar />
         </div>
+        
+
       </div>
 
       {/* Mobile Bottom Navigation */}

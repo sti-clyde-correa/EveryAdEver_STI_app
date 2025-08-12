@@ -1,51 +1,70 @@
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Link } from "react-router-dom";
-import { 
-  ArrowRight, 
-  Users, 
-  MessageCircle, 
-  Share2, 
-  Zap, 
-  Shield, 
-  Globe, 
+import {
+  ArrowRight,
+  Users,
+  MessageCircle,
+  Share2,
+  Zap,
+  Shield,
+  Globe,
   Heart,
   Star,
-  CheckCircle
+  CheckCircle,
+  Moon,
+  Sun,
+  Menu,
+  X
 } from "lucide-react";
+import { useState } from "react";
+import logo from '../assets/logo.png';
+import { createPortal } from "react-dom";
 
 export default function Landing() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const features = [
     {
-      icon: Users,
-      title: "Connect with People",
-      description: "Build meaningful relationships with people who share your interests and passions."
-    },
-    {
       icon: MessageCircle,
-      title: "Real-time Messaging",
-      description: "Stay connected with instant messaging, group chats, and live conversations."
-    },
-    {
-      icon: Share2,
-      title: "Share Your Story",
-      description: "Express yourself through posts, photos, stories, and creative content."
-    },
-    {
-      icon: Zap,
-      title: "Lightning Fast",
-      description: "Experience blazing-fast performance with our optimized social platform."
-    },
-    {
-      icon: Shield,
-      title: "Privacy First",
-      description: "Your data is protected with enterprise-grade security and privacy controls."
+      title: "Seek",
+      description: "Look for events happening around you - a concert, a picnic, a meet-up, a lot of like minded people around you."
     },
     {
       icon: Globe,
-      title: "Global Community",
-      description: "Join a worldwide community of creators, thinkers, and innovators."
-    }
+      title: "Advertise",
+      description: "Advertise events you want to host"
+    },
+    {
+      icon: Users,
+      title: "Get Noticed",
+      description: "Get popular, Forge a reputation"
+    },
+    // {
+    //   icon: MessageCircle,
+    //   title: "Real-time Messaging",
+    //   description: "Stay connected with instant messaging, group chats, and live conversations."
+    // },
+    // {
+    //   icon: Share2,
+    //   title: "Share Your Story",
+    //   description: "Express yourself through posts, photos, stories, and creative content."
+    // },
+    // {
+    //   icon: Zap,
+    //   title: "Lightning Fast",
+    //   description: "Experience blazing-fast performance with our optimized social platform."
+    // },
+    // {
+    //   icon: Shield,
+    //   title: "Privacy First",
+    //   description: "Your data is protected with enterprise-grade security and privacy controls."
+    // },
+    // {
+    //   icon: Globe,
+    //   title: "Global Community",
+    //   description: "Join a worldwide community of creators, thinkers, and innovators."
+    // }
   ];
 
   const testimonials = [
@@ -72,33 +91,140 @@ export default function Landing() {
     }
   ];
 
+  // Check if user has a stored preference or if dark mode is currently applied
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return (
+        document.documentElement.classList.contains("dark") ||
+        localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      );
+    }
+    return true; // Default to dark mode
+  });
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="fixed top-0 z-50 w-full bg-background/80 backdrop-blur-md border-b border-border">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <div className="w-4 h-4 bg-primary-foreground rounded-sm transform rotate-45"></div>
-            </div>
+            {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center"> */}
+            {/* <div className="w-4 h-4 bg-primary-foreground rounded-sm transform rotate-45"></div> */}
+            {/* </div> */}
+            <img src={logo} alt="EveryAdEver" className="w-8 h-8 object-contain" />
             <span className="text-xl font-bold text-foreground">EveryAdEver</span>
           </div>
-          
-          <div className="hidden md:flex items-center gap-8">
+
+          {/* <div className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">Features</a>
             <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
             <a href="#testimonials" className="text-muted-foreground hover:text-foreground transition-colors">Reviews</a>
             <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contact</a>
-          </div>
+          </div> */}
 
-          <div className="flex items-center gap-4">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            {/* <a href="#" className="text-muted-foreground hover:text-foreground transition-colors active">Home</a> */}
+            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">About</a>
             <Button variant="ghost" asChild>
               <Link to="/signin">Sign In</Link>
             </Button>
             <Button asChild>
               <Link to="/signup">Get Started</Link>
             </Button>
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium hover:bg-secondary transition-colors"
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
           </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="p-2 rounded-lg hover:bg-secondary transition-colors"
+            >
+              <Menu className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && createPortal(
+            <div className="fixed inset-0 z-[9999]">
+              <div
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <div className="fixed inset-y-0 right-0 w-full max-w-sm bg-background p-6 shadow-lg border-l border-border">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                      <div className="w-4 h-4 bg-primary-foreground rounded-sm transform rotate-45" />
+                    </div>
+                    <span className="text-xl font-bold text-foreground">EveryAdEver</span>
+                  </div>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-2 rounded-lg hover:bg-secondary transition-colors"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <nav className="space-y-6">
+                  <a
+                    href="#about"
+                    className="block text-lg text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    About
+                  </a>
+
+                  <div className="space-y-4">
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/signin" onClick={() => setMobileMenuOpen(false)}>
+                        Sign In
+                      </Link>
+                    </Button>
+                    <Button className="w-full justify-start" asChild>
+                      <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>
+                        Get Started
+                      </Link>
+                    </Button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      toggleTheme();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-base font-medium hover:bg-secondary transition-colors w-full"
+                  >
+                    {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                    {isDarkMode ? "Light Mode" : "Dark Mode"}
+                  </button>
+                </nav>
+              </div>
+            </div>,
+            document.body
+          )}
         </nav>
       </header>
 
@@ -117,20 +243,19 @@ export default function Landing() {
               <Heart className="h-4 w-4 text-red-500" />
               Join thousands of users worldwide
             </div>
-            
+
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground mb-6">
-              Connect, Share, and
+              Connect, Share, Advertise and
               <br />
               <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Grow Together
               </span>
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed">
-              Experience the future of social networking with EveryAdEver. Connect with like-minded people, 
-              share your passion, and build meaningful relationships in a safe and engaging environment.
+              EveryAdEver helps you find events close to you and organize them seamlessly.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Button size="lg" className="w-full sm:w-auto text-lg px-8 py-3 shadow-lg hover:shadow-xl transition-all duration-300" asChild>
                 <Link to="/signup">
@@ -138,9 +263,9 @@ export default function Landing() {
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
+              <Button
+                variant="outline"
+                size="lg"
                 className="w-full sm:w-auto text-lg px-8 py-3 bg-background/50 backdrop-blur-sm"
                 asChild
               >
@@ -168,7 +293,8 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 bg-secondary/20">
+      {/* <section id="features" className="py-20 bg-secondary/20"> */}
+      <section id="features" className="py-20 bg-primary/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
@@ -176,6 +302,7 @@ export default function Landing() {
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Powerful features designed to help you build meaningful relationships and share your story with the world.
+              Advertise with us and get maximum attendance for your events
             </p>
           </div>
 
@@ -195,8 +322,74 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* about Section */}
+      <section id="about" className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="p-6 mx-auto">
+            <h1 className="text-2xl font-bold mb-4">EveryAdEver</h1>
+            <p className="mb-4">
+              EveryAdEver is a leading marketing and advertising agency that
+              specializes in providing innovative and effective solutions to help
+              businesses reach their target audience and achieve their marketing
+              goals. With a team of experienced professionals and a deep understanding
+              of the ever-evolving advertising landscape, we strive to deliver
+              exceptional results for our clients.
+            </p>
+
+            <h2 className="text-xl font-semibold mt-6 mb-2">Mission</h2>
+            <p className="mb-4">
+              Our mission is to empower businesses of all sizes to maximize their
+              marketing potential by offering comprehensive advertising services that
+              drive growth, increase brand visibility, and generate measurable results.
+              We are committed to staying at the forefront of industry trends and
+              technologies to provide our clients with cutting-edge strategies and
+              campaigns.
+            </p>
+
+            <h2 className="text-xl font-semibold mt-6 mb-2">Services</h2>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li>
+                <strong>Digital Advertising:</strong> Targeted campaigns including SEM,
+                social media, display, and mobile advertising.
+              </li>
+              <li>
+                <strong>Creative Design:</strong> Stunning visuals and compelling copy
+                aligned with brand identity.
+              </li>
+              <li>
+                <strong>Branding and Strategy:</strong> Comprehensive brand positioning
+                and logo design.
+              </li>
+              <li>
+                <strong>Media Planning and Buying:</strong> Strategic media placement
+                for maximum reach.
+              </li>
+              <li>
+                <strong>Analytics and Reporting:</strong> Data-driven insights to
+                optimize marketing efforts.
+              </li>
+            </ul>
+
+            <h2 className="text-xl font-semibold mt-6 mb-2">Why Choose EveryAdEver?</h2>
+            <ul className="list-disc list-inside mb-4 space-y-2">
+              <li><strong>Expertise:</strong> Industry experts delivering innovative solutions.</li>
+              <li><strong>Customized Approach:</strong> Strategies tailored to client goals.</li>
+              <li><strong>Results-Oriented:</strong> Focus on measurable growth and ROI.</li>
+              <li><strong>Client-Centric:</strong> Transparent communication and strong relationships.</li>
+              <li><strong>Ethical Practices:</strong> Integrity and compliance with regulations.</li>
+            </ul>
+
+            <p className="mt-6">
+              Contact us today to discuss how EveryAdEver can help your business achieve
+              its marketing objectives. Let us be your partner in success!
+            </p>
+          </div>
+
+
+        </div>
+      </section>
       {/* Testimonials Section */}
-      <section id="testimonials" className="py-20">
+      {/* <section id="testimonials" className="py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
@@ -233,7 +426,7 @@ export default function Landing() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-20 bg-primary/5">
@@ -274,7 +467,7 @@ export default function Landing() {
                 Connect, share, and grow together in a safe and engaging social environment.
               </p>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-foreground mb-4">Product</h3>
               <ul className="space-y-2 text-muted-foreground">
@@ -283,7 +476,7 @@ export default function Landing() {
                 <li><a href="#" className="hover:text-foreground transition-colors">API</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-foreground mb-4">Company</h3>
               <ul className="space-y-2 text-muted-foreground">
@@ -292,7 +485,7 @@ export default function Landing() {
                 <li><a href="#" className="hover:text-foreground transition-colors">Careers</a></li>
               </ul>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-foreground mb-4">Support</h3>
               <ul className="space-y-2 text-muted-foreground">
@@ -302,7 +495,7 @@ export default function Landing() {
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
             <p>&copy; 2024 EveryAdEver. All rights reserved.</p>
           </div>

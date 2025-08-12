@@ -366,3 +366,241 @@ And CSS is imported in `styles/globals.css`:
 If you want, I can give you a **Docker-based deployment** flow for Next.js + Tailwind on Ubuntu so you won’t have to install Node.js directly on the server. That approach is cleaner for scaling.
 
 
+
+
+# DB schema created by clyde
+
+-- ==============================
+-- DATABASE: everyadever
+-- ==============================
+
+-- Extensions (Optional but recommended)
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+-- ==============================
+-- MASTER DATA TABLES
+-- ==============================
+
+CREATE TABLE Countries (
+    country_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    iso_code CHAR(2) UNIQUE NOT NULL
+);
+
+CREATE TABLE Regions (
+    region_id SERIAL PRIMARY KEY,
+    country_id INT REFERENCES Countries(country_id),
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Cities (
+    city_id SERIAL PRIMARY KEY,
+    region_id INT REFERENCES Regions(region_id),
+    name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Zips (
+    zip_id SERIAL PRIMARY KEY,
+    city_id INT REFERENCES Cities(city_id),
+    zip_code VARCHAR(20) NOT NULL
+);
+
+-- ==============================
+-- USER TABLES
+-- ==============================
+
+CREATE TABLE Users (
+    user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    date_of_birth DATE,
+    gender VARCHAR(20),
+    city_id INT REFERENCES Cities(city_id),
+    bio TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE UserPics (
+    pic_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    file_url TEXT NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE UserVideos (
+    video_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    file_url TEXT NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- SOCIAL CONNECTIONS
+-- ==============================
+
+CREATE TABLE Relationships (
+    relationship_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    friend_id UUID REFERENCES Users(user_id),
+    status VARCHAR(20) CHECK (status IN ('pending','accepted','blocked')),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- EVENTS & FILES
+-- ==============================
+
+CREATE TABLE Events (
+    event_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    creator_id UUID REFERENCES Users(user_id),
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    location VARCHAR(255),
+    start_time TIMESTAMP NOT NULL,
+    end_time TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE EventFiles (
+    file_id SERIAL PRIMARY KEY,
+    event_id UUID REFERENCES Events(event_id),
+    file_url TEXT NOT NULL,
+    uploaded_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE Plans (
+    plan_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    name VARCHAR(255) NOT NULL,
+    price NUMERIC(10,2) NOT NULL,
+    features TEXT[],
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- PAYMENTS & TRANSACTIONS
+-- ==============================
+
+CREATE TABLE Payments (
+    payment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES Users(user_id),
+    plan_id INT REFERENCES Plans(plan_id),
+    amount NUMERIC(10,2) NOT NULL,
+    status VARCHAR(20) CHECK (status IN ('pending','completed','failed')),
+    paid_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE Transactions (
+    transaction_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    payment_id UUID REFERENCES Payments(payment_id),
+    gateway_reference VARCHAR(255),
+    transaction_type VARCHAR(20) CHECK (transaction_type IN ('credit','debit')),
+    amount NUMERIC(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- COMMUNICATIONS
+-- ==============================
+
+CREATE TABLE ChatHistories (
+    chat_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sender_id UUID REFERENCES Users(user_id),
+    receiver_id UUID REFERENCES Users(user_id),
+    message TEXT NOT NULL,
+    sent_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE ContactsUs (
+    contact_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    subject VARCHAR(255),
+    message TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE SalesRequests (
+    request_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    details TEXT,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- EXTRA TABLES FOR SOCIAL MEDIA
+-- ==============================
+
+CREATE TABLE Notifications (
+    notification_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES Users(user_id),
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE Likes (
+    like_id SERIAL PRIMARY KEY,
+    user_id UUID REFERENCES Users(user_id),
+    event_id UUID REFERENCES Events(event_id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE Comments (
+    comment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES Users(user_id),
+    event_id UUID REFERENCES Events(event_id),
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ==============================
+-- HISTORY TABLES (Audit logs)
+-- ==============================
+
+CREATE TABLE Users_Hist (LIKE Users INCLUDING ALL);
+CREATE TABLE Events_Hist (LIKE Events INCLUDING ALL);
+CREATE TABLE Payments_Hist (LIKE Payments INCLUDING ALL);
+CREATE TABLE Transactions_Hist (LIKE Transactions INCLUDING ALL);
+CREATE TABLE ChatHistories_Hist (LIKE ChatHistories INCLUDING ALL);
+
+-- ==============================
+-- FUNCTIONS & TRIGGERS FOR HISTORY
+-- ==============================
+
+-- Generic history insert function
+CREATE OR REPLACE FUNCTION log_history()
+RETURNS TRIGGER AS $$
+BEGIN
+    EXECUTE format('INSERT INTO %I SELECT ($1).*', TG_TABLE_NAME || '_Hist') USING NEW;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Triggers for history tables
+CREATE TRIGGER trg_users_hist
+AFTER INSERT OR UPDATE ON Users
+FOR EACH ROW EXECUTE FUNCTION log_history();
+
+CREATE TRIGGER trg_events_hist
+AFTER INSERT OR UPDATE ON Events
+FOR EACH ROW EXECUTE FUNCTION log_history();
+
+CREATE TRIGGER trg_payments_hist
+AFTER INSERT OR UPDATE ON Payments
+FOR EACH ROW EXECUTE FUNCTION log_history();
+
+CREATE TRIGGER trg_transactions_hist
+AFTER INSERT OR UPDATE ON Transactions
+FOR EACH ROW EXECUTE FUNCTION log_history();
+
+CREATE TRIGGER trg_chathistories_hist
+AFTER INSERT OR UPDATE ON ChatHistories
+FOR EACH ROW EXECUTE FUNCTION log_history();
+

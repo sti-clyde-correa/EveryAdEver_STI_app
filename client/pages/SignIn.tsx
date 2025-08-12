@@ -6,6 +6,7 @@ import { Label } from "../components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
 import { useAuth } from "../contexts/AuthContext";
 import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
+import logo from "../assets/logo.png";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -43,9 +44,10 @@ export default function SignIn() {
         <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              {/* <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <div className="w-4 h-4 bg-primary-foreground rounded-sm transform rotate-45"></div>
-              </div>
+              </div> */}
+              <img src={logo} alt="EveryAdEver" className="w-8 h-8 object-contain" />              
               <span className="text-xl font-bold text-foreground">EveryAdEver</span>
             </Link>
 
