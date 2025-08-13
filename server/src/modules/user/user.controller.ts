@@ -12,6 +12,11 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('/all')
+  async getUser() {
+    return this.userService.findByUsernameAll("1");
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string) {
