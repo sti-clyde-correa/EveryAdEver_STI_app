@@ -38,3 +38,14 @@ process.on("SIGINT", () => {
   console.log("🛑 Received SIGINT, shutting down gracefully");
   process.exit(0);
 });
+
+// Application entry point
+import "./main";
+
+// Root module
+import "./app.module";
+
+// Feature modules
+import "./modules/user/user.controller";
+import "./modules/user/user.service";
+import "./modules/user/user.module";
