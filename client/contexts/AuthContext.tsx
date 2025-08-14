@@ -1,3 +1,4 @@
+import { loginUser } from '@/services/auth';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 interface User {
@@ -20,6 +21,8 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+
 
 export function useAuth() {
   const context = useContext(AuthContext);
@@ -52,25 +55,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
+    console.log("Attempting login for:", email);
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // Mock authentication - in real app, this would be an API call
     if (email && password) {
-      const mockUser: User = {
-        id: '1',
-        name: 'John Doe',
-        username: 'johndoe',
-        email: email,
+
+      const success = await loginUser({ email, password });
+      if (success) {
+        const mockUser: User = {
+          id: '1',
+          name: 'John Doe',
+          username: 'johndoe',
+          email: email,
         avatar: '/api/placeholder/40/40',
         followers: 1245,
         following: 842
       };
+    
       
       setUser(mockUser);
       localStorage.setItem('user', JSON.stringify(mockUser));
       setIsLoading(false);
+    }
       return true;
     }
     

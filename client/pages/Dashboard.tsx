@@ -6,9 +6,23 @@ import PostComposer from "../components/PostComposer";
 import Post from "../components/Post";
 import BottomNavigation from "../components/BottomNavigation";
 import { useAuth } from "../contexts/AuthContext";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function Dashboard() {
+   const navigate = useNavigate();
   const { user } = useAuth();
+
+   useEffect(() => {
+    // Client-side check
+    const token = localStorage.getItem('jwt');
+    if (!token) {
+      alert("You are not logged in. Redirecting to sign-in page.");
+      navigate('/signin');
+    }
+  }, [navigate]);
 
   const currentUser = {
     name: user?.name || "John Doe",

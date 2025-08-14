@@ -27,6 +27,7 @@ export default function SignIn() {
 
     try {
       const success = await login(email, password);
+      console.log("success",success);
       if (success) {
         navigate("/dashboard");
       } else {

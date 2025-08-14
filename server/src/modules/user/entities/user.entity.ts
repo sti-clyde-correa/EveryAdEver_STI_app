@@ -8,6 +8,15 @@ export class User {
   user_id: string;
 
   @ApiProperty()
+  @Column()
+  first_name: string;
+  
+  @ApiProperty()
+  @Column()
+  last_name: string;
+  
+  
+  @ApiProperty()
   @Column({ unique: true })
   username: string;
 

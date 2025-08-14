@@ -18,6 +18,10 @@ export default defineConfig(({ mode }) => ({
       allow: ["./client", "./shared"],
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
     },
+    define: {
+      'process.env.NEXT_PUBLIC_API_URL': JSON.stringify(process.env.NEXT_PUBLIC_API_URL),
+      'process.env.NEXT_PUBLIC_API_URL_DEV': JSON.stringify(process.env.NEXT_PUBLIC_API_URL_DEV)
+    },
   },
   build: {
     outDir: "dist/spa",

@@ -22,12 +22,12 @@ export class CorsConfigService {
         } else {
           callback(new Error('Not allowed by CORS'));
         }
-      },
+      },    
       methods: corsConfig.methods,
       credentials: true,
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
       exposedHeaders: ['Content-Disposition'],
-      maxAge: 3600, // 1 hour
+      maxAge: 3600, // 1 hour      
     };
   }
 }

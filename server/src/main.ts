@@ -4,6 +4,9 @@ import { ConfigService } from './config/config.service';
 import { CorsConfigService } from './config/cors/cors.service';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+// import cookieParser from 'cookie-parser';
+const cookieParser = require('cookie-parser');
+// import * as cookieParser from "cookie-parser";
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -13,14 +16,20 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const corsConfigService = app.get(CorsConfigService);
 
+    
+app.use(cookieParser());
+
   // Set global prefix
   const apiConfig = configService.api;
   const globalPrefix = `${apiConfig.prefix}/${apiConfig.version}`;
   app.setGlobalPrefix(globalPrefix);
 
+  
+
   // Enable CORS
   app.enableCors(corsConfigService.createCorsOptions());
 
+  
   // Enable validation pipes
   app.useGlobalPipes(new ValidationPipe({
     transform: true,
@@ -30,8 +39,8 @@ async function bootstrap() {
 
   // Setup Swagger
   const config = new DocumentBuilder()
-    .setTitle('Vibe Lab API')
-    .setDescription('The Vibe Lab API documentation')
+    .setTitle('EveryAdEver API')
+    .setDescription('EveryAdEver API documentation')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

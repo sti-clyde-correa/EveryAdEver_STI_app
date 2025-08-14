@@ -14,7 +14,33 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
 
+
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        if (typeof window !== "undefined") {
+            return (
+                document.documentElement.classList.contains("dark") ||
+                localStorage.getItem("theme") === "dark" ||
+                (!localStorage.getItem("theme") &&
+                    window.matchMedia("(prefers-color-scheme: dark)").matches)
+            );
+        }
+        return true; // Default to dark mode
+    });
+
     useEffect(() => {
+
+        const storedTheme = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const shouldUseDark = storedTheme === "dark" || (!storedTheme && prefersDark);
+
+        setIsDarkMode(shouldUseDark);
+
+        if (shouldUseDark) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+        
         const handleClickOutside = (event: MouseEvent) => {
             if (ref.current && !ref.current.contains(event.target as Node)) {
                 setOpen(false);
@@ -22,10 +48,25 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
+
     }, []);
 
+
+    const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
+
     return (
-            <div ref={ref} style={{ position: "relative", display: "inline-block", zIndex: 9999 }}>
+        <div ref={ref} style={{ position: "relative", display: "inline-block", zIndex: 9999 }}>
             <button
                 onClick={() => setOpen((prev) => !prev)}
                 style={{
@@ -67,16 +108,16 @@ const DropdownProfile: React.FC<DropdownProfileProps> = ({
             </button>
             {open && (
                 <div
-                        style={{
-                            position: "absolute",
-                            right: 0,
-                            top: "calc(100% + 8px)",
-                            background: "#fff",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                            borderRadius: 8,
-                            minWidth: 160,
-                            zIndex: 9999,
-                        }}
+                    style={{
+                        position: "absolute",
+                        right: 0,
+                        top: "calc(100% + 8px)",
+                        background: "#fff",
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        borderRadius: 8,
+                        minWidth: 160,
+                        zIndex: 9999,
+                    }}
                 >
                     <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
                         <li>

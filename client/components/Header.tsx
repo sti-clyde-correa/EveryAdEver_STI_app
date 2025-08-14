@@ -257,7 +257,7 @@ export default function Header() {
                 <Moon className="h-4 w-4 text-muted-foreground" />
               )}
             </button>
-            {/* <DropdownProfile /> */}
+            <DropdownProfile />
           </div>
 
           <div className="flex lg:hidden items-center gap-2">
